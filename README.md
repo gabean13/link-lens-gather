@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# 링크포켓(Link Pocket)  
+[배포 링크 바로가기](https://link-lens-gather.lovable.app/)
 
-## Project info
+## 서비스 소개
 
-**URL**: https://lovable.dev/projects/cb06f39a-5dab-4624-8a65-2f23b6e1144d
+**링크포켓**은 웹에서 발견한 다양한 링크(아티클, 블로그, 유튜브, 채용공고 등)를 쉽고 빠르게 저장하고, 태그s와 함께 분류하며, 친구들과 공유하거나 AI 추천을 받을 수 있는 링크 아카이빙 서비스입니다.  
+모던하고 직관적인 UI로, 나만의 링크 컬렉션을 만들고, 필요할 때 빠르게 찾아볼 수 있습니다.
 
-## How can I edit this code?
+## 서비스 목적
 
-There are several ways of editing your application.
+- 웹에서 유용한 정보를 발견했을 때, 잊지 않고 저장하고 관리할 수 있도록 돕습니다.
+- 태그, 검색, AI 추천 등 다양한 방식으로 링크를 분류·탐색할 수 있습니다.
+- 친구들과 링크를 공유하거나, 인기/추천 링크를 받아볼 수 있습니다.
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cb06f39a-5dab-4624-8a65-2f23b6e1144d) and start prompting.
+## 주요 기능
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. 링크 저장 및 태그 분류
+- URL을 입력하면 AI가 자동으로 제목, 설명, 태그를 추천해줍니다.
+- 사용자가 직접 태그를 추가하거나 수정할 수 있습니다.
+- 저장된 링크는 썸네일, 제목, 설명과 함께 카드 형태로 보여집니다.
 
-**Use your preferred IDE**
+### 2. 링크 탐색 및 관리
+- 전체, 인기, 친구, 안 읽은, 최근 추가 등 다양한 뷰로 링크를 탐색할 수 있습니다.
+- 태그별 필터링, 검색 기능 제공.
+- 각 링크는 좋아요, 공유, 새 탭 열기, 읽음/안읽음 표시가 가능합니다.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 3. 스마트 추천 및 통계
+- AI 기반 추천 링크, 비슷한 링크 찾기, 읽기 시간 예측 등 스마트 기능 제공.
+- 인기 태그, 전체 링크 수, 오늘 추가된 링크, 안 읽은 링크 등 통계 카드 제공.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 4. 친구와의 공유
+- 친구 패널을 통해 친구가 추천한 링크를 확인할 수 있습니다.
+- 링크를 클립보드에 복사하거나, 공유 기능 제공.
 
-Follow these steps:
+## 세부 설명
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **메인 페이지**  
+  - 상단 네비게이션에서 전체/인기/친구/내 컬렉션/스마트 기능 등 다양한 뷰 전환 가능.
+  - 검색창과 태그 필터로 원하는 링크를 빠르게 찾을 수 있음.
+  - 통계 카드로 내 링크 현황을 한눈에 확인.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **링크 추가**  
+  - URL 입력 시 AI가 자동으로 링크 정보를 분석(제목, 설명, 태그 추천).
+  - 직접 태그 추가 및 삭제 가능.
+  - 저장 버튼 클릭 시, 링크가 컬렉션에 추가됨.
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **링크 카드**  
+  - 썸네일, 제목, 설명, 추가일, 태그, 좋아요, 공유, 새 탭 열기 등 다양한 인터랙션 제공.
+  - 카드 클릭 시, 미리보기 다이얼로그로 상세 내용 확인 가능(실제 서비스에서는 웹페이지 미리보기 지원 예정).
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- **스마트 추천**  
+  - 안 읽은 링크, 최근 추가된 링크, AI 추천 링크, 인기 태그 등 다양한 추천 섹션 제공.
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/cb06f39a-5dab-4624-8a65-2f23b6e1144d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- **모킹 데이터 기반 프로토타입**  
+  - 현재는 mockData를 활용한 프로토타입으로, 실제 서비스에서는 백엔드 연동 및 사용자 인증, 실시간 동기화 등이 추가될 예정.
