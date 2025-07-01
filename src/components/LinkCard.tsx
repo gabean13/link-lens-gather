@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ExternalLink, Clock, Share2, Eye, MoreVertical, Heart, Bookmark } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { CommentSection } from './CommentSection';
 
 interface LinkCardProps {
   link: {
@@ -24,6 +24,25 @@ interface LinkCardProps {
 export function LinkCard({ link }: LinkCardProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+
+  const mockComments = [
+    {
+      id: '1',
+      user: { id: '1', name: '김유저', avatar: '' },
+      content: '정말 유용한 정보네요! 감사합니다 😊',
+      likes: 5,
+      isLiked: false,
+      createdAt: '2024-01-15T10:30:00Z'
+    },
+    {
+      id: '2',
+      user: { id: '2', name: '이블로거', avatar: '' },
+      content: '저도 비슷한 경험이 있어서 공감이 되네요.',
+      likes: 3,
+      isLiked: true,
+      createdAt: '2024-01-15T14:20:00Z'
+    }
+  ];
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -193,6 +212,12 @@ export function LinkCard({ link }: LinkCardProps) {
                 </p>
               </div>
             </div>
+            
+            {/* 댓글 섹션 추가 */}
+            <CommentSection
+              linkId={link.id}
+              comments={mockComments}
+            />
           </div>
         </DialogContent>
       </Dialog>

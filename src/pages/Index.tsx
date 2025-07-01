@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus, Search, User, Share2, Tag, ExternalLink, Clock, Bookmark, Heart, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,8 @@ import { LinkCard } from '@/components/LinkCard';
 import { FriendsPanel } from '@/components/FriendsPanel';
 import { SmartRecommendations } from '@/components/SmartRecommendations';
 import { mockLinks } from '@/data/mockData';
+import { WeeklyTopLinks } from '@/components/WeeklyTopLinks';
+import { CollectionsPanel } from '@/components/CollectionsPanel';
 
 const Index = () => {
   const [links, setLinks] = useState(mockLinks);
@@ -19,6 +20,7 @@ const Index = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
+  const [showCollections, setShowCollections] = useState(false);
   const [currentView, setCurrentView] = useState<'all' | 'popular' | 'friends' | 'unread' | 'recent'>('all');
 
   const allTags = Array.from(new Set(links.flatMap(link => link.tags)));
@@ -234,6 +236,15 @@ const Index = () => {
               </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger 
+              className="rounded-xl hover:bg-pink-50"
+              onClick={() => setShowCollections(true)}
+            >
+              👥 컬렉션 & 소셜
+            </MenubarTrigger>
+          </MenubarMenu>
         </Menubar>
       </div>
 
@@ -338,6 +349,11 @@ const Index = () => {
           </Card>
         </div>
 
+        {/* 주간 인기 링크 섹션 추가 */}
+        <div className="mb-6">
+          <WeeklyTopLinks />
+        </div>
+
         {/* Content Section */}
         {currentView === 'all' ? (
           <SmartRecommendations links={filteredLinks} />
@@ -385,6 +401,11 @@ const Index = () => {
       {/* Friends Panel */}
       {showFriends && (
         <FriendsPanel onClose={() => setShowFriends(false)} />
+      )}
+
+      {/* Collections Panel */}
+      {showCollections && (
+        <CollectionsPanel onClose={() => setShowCollections(false)} />
       )}
     </div>
   );
