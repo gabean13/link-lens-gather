@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarTrigger } from '@/components/ui/menubar';
 import { AddLinkForm } from '@/components/AddLinkForm';
 import { LinkCard } from '@/components/LinkCard';
 import { FriendsPanel } from '@/components/FriendsPanel';
@@ -18,15 +19,50 @@ const Index = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
+  const [currentView, setCurrentView] = useState<'all' | 'popular' | 'friends' | 'unread' | 'recent'>('all');
 
   const allTags = Array.from(new Set(links.flatMap(link => link.tags)));
   
-  const filteredLinks = links.filter(link => {
-    const matchesSearch = link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         link.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => link.tags.includes(tag));
-    return matchesSearch && matchesTags;
-  });
+  const getFilteredLinks = () => {
+    let filtered = links;
+    
+    // 뷰별 필터링
+    switch (currentView) {
+      case 'popular':
+        filtered = links.slice().sort(() => Math.random() - 0.5).slice(0, 8); // 임시로 랜덤 정렬
+        break;
+      case 'friends':
+        filtered = links.filter(link => link.tags.includes('추천') || Math.random() > 0.5).slice(0, 6);
+        break;
+      case 'unread':
+        filtered = links.filter(link => !link.isRead);
+        break;
+      case 'recent':
+        filtered = links.slice().sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()).slice(0, 10);
+        break;
+      default:
+        filtered = links;
+    }
+    
+    // 검색 필터링
+    if (searchTerm) {
+      filtered = filtered.filter(link => 
+        link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        link.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // 태그 필터링
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(link => 
+        selectedTags.some(tag => link.tags.includes(tag))
+      );
+    }
+    
+    return filtered;
+  };
+
+  const filteredLinks = getFilteredLinks();
 
   const handleAddLink = (newLink: any) => {
     setLinks(prev => [{ ...newLink, id: Date.now().toString() }, ...prev]);
@@ -42,6 +78,21 @@ const Index = () => {
   };
 
   const unreadCount = links.filter(link => !link.isRead).length;
+  const todayCount = links.filter(link => {
+    const today = new Date();
+    const linkDate = new Date(link.addedAt);
+    return linkDate.toDateString() === today.toDateString();
+  }).length;
+
+  const getViewTitle = () => {
+    switch (currentView) {
+      case 'popular': return '인기 링크 🔥';
+      case 'friends': return '친구들의 링크 👫';
+      case 'unread': return '안 읽은 링크 📚';
+      case 'recent': return '최근 링크 ⏰';
+      default: return '모든 링크 📋';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
@@ -88,7 +139,105 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      {/* Navigation Menu */}
+      <div className="max-w-4xl mx-auto px-4 py-4">
+        <Menubar className="bg-white/80 backdrop-blur-sm border-2 border-pink-200 rounded-2xl shadow-sm">
+          <MenubarMenu>
+            <MenubarTrigger 
+              className={`rounded-xl transition-all ${currentView === 'all' ? 'bg-pink-100 text-pink-700' : 'hover:bg-pink-50'}`}
+              onClick={() => setCurrentView('all')}
+            >
+              📋 전체보기
+            </MenubarTrigger>
+          </MenubarMenu>
+          
+          <MenubarMenu>
+            <MenubarTrigger className="rounded-xl hover:bg-pink-50">🔥 인기 콘텐츠</MenubarTrigger>
+            <MenubarContent className="bg-white/95 backdrop-blur-sm rounded-2xl border-pink-200 shadow-lg">
+              <MenubarItem 
+                className="rounded-xl"
+                onClick={() => setCurrentView('popular')}
+              >
+                <Sparkles className="w-4 h-4 mr-2 text-orange-500" />
+                전체 인기 링크
+              </MenubarItem>
+              <MenubarSeparator />
+              {allTags.slice(0, 5).map(tag => (
+                <MenubarItem 
+                  key={tag}
+                  className="rounded-xl"
+                  onClick={() => {
+                    setSelectedTags([tag]);
+                    setCurrentView('all');
+                  }}
+                >
+                  <Tag className="w-4 h-4 mr-2 text-purple-500" />
+                  #{tag} 인기글
+                </MenubarItem>
+              ))}
+            </MenubarContent>
+          </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger 
+              className={`rounded-xl transition-all ${currentView === 'friends' ? 'bg-pink-100 text-pink-700' : 'hover:bg-pink-50'}`}
+              onClick={() => setCurrentView('friends')}
+            >
+              👫 친구들 링크
+            </MenubarTrigger>
+          </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger className="rounded-xl hover:bg-pink-50">📚 내 컬렉션</MenubarTrigger>
+            <MenubarContent className="bg-white/95 backdrop-blur-sm rounded-2xl border-pink-200 shadow-lg">
+              <MenubarItem 
+                className="rounded-xl"
+                onClick={() => setCurrentView('unread')}
+              >
+                <Bookmark className="w-4 h-4 mr-2 text-orange-500" />
+                안 읽은 링크 ({unreadCount})
+              </MenubarItem>
+              <MenubarItem 
+                className="rounded-xl"
+                onClick={() => setCurrentView('recent')}
+              >
+                <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                최근 추가한 링크
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem className="rounded-xl">
+                <Heart className="w-4 h-4 mr-2 text-pink-500" />
+                좋아요 한 링크
+              </MenubarItem>
+              <MenubarItem className="rounded-xl">
+                <Share2 className="w-4 h-4 mr-2 text-green-500" />
+                공유한 링크
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger className="rounded-xl hover:bg-pink-50">⚡ 스마트 기능</MenubarTrigger>
+            <MenubarContent className="bg-white/95 backdrop-blur-sm rounded-2xl border-pink-200 shadow-lg">
+              <MenubarItem className="rounded-xl">
+                <Sparkles className="w-4 h-4 mr-2 text-yellow-500" />
+                AI 추천 링크
+              </MenubarItem>
+              <MenubarItem className="rounded-xl">
+                <ExternalLink className="w-4 h-4 mr-2 text-indigo-500" />
+                비슷한 링크 찾기
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem className="rounded-xl">
+                <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                읽기 시간 예측
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 py-2">
         {/* Search */}
         <div className="mb-6">
           <div className="relative">
@@ -171,10 +320,10 @@ const Index = () => {
           </Card>
           <Card className="bg-gradient-to-br from-blue-100 to-blue-50 border-blue-200 shadow-sm">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600 mb-1">5</div>
+              <div className="text-2xl font-bold text-blue-600 mb-1">{todayCount}</div>
               <div className="text-sm text-blue-700 flex items-center justify-center gap-1">
                 <Clock className="w-3 h-3" />
-                이번 주
+                오늘 추가
               </div>
             </CardContent>
           </Card>
@@ -189,8 +338,27 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Smart Recommendations */}
-        <SmartRecommendations links={filteredLinks} />
+        {/* Content Section */}
+        {currentView === 'all' ? (
+          <SmartRecommendations links={filteredLinks} />
+        ) : (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800">{getViewTitle()}</h2>
+              <Badge className="bg-pink-100 text-pink-700 rounded-full">
+                {filteredLinks.length}개
+              </Badge>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredLinks.map(link => (
+                <LinkCard key={link.id} link={link} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* No Results */}
         {filteredLinks.length === 0 && (
@@ -204,6 +372,7 @@ const Index = () => {
               onClick={() => {
                 setSearchTerm('');
                 setSelectedTags([]);
+                setCurrentView('all');
               }}
               className="bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 rounded-full"
             >

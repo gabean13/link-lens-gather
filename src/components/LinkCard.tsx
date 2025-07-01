@@ -25,23 +25,32 @@ export function LinkCard({ link }: LinkCardProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
-  const handleShare = () => {
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
     navigator.clipboard.writeText(link.url);
     toast.success('링크가 클립보드에 복사되었어요! 📋✨');
   };
 
-  const handleViewContent = () => {
+  const handleCardClick = () => {
     setShowPreview(true);
   };
 
-  const handleLike = () => {
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsLiked(!isLiked);
     toast.success(isLiked ? '좋아요를 취소했어요 💔' : '좋아요! 💖');
   };
 
+  const handleMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <>
-      <Card className="group bg-white/90 backdrop-blur-sm border-2 border-gray-100 hover:border-pink-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] rounded-3xl overflow-hidden">
+      <Card 
+        className="group bg-white/90 backdrop-blur-sm border-2 border-gray-100 hover:border-pink-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] rounded-3xl overflow-hidden cursor-pointer"
+        onClick={handleCardClick}
+      >
         <CardHeader className="p-4 pb-2">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -53,27 +62,25 @@ export function LinkCard({ link }: LinkCardProps) {
               </p>
             </div>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-pink-50">
-                  <MoreVertical className="w-4 h-4 text-gray-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm border-pink-200 rounded-2xl shadow-lg">
-                <DropdownMenuItem onClick={handleViewContent} className="rounded-xl">
-                  <Eye className="w-4 h-4 mr-2 text-purple-500" />
-                  미리보기
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShare} className="rounded-xl">
-                  <Share2 className="w-4 h-4 mr-2 text-blue-500" />
-                  공유하기
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => window.open(link.url, '_blank')} className="rounded-xl">
-                  <ExternalLink className="w-4 h-4 mr-2 text-green-500" />
-                  새 탭에서 열기
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div onClick={handleMoreClick}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-pink-50">
+                    <MoreVertical className="w-4 h-4 text-gray-400" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm border-pink-200 rounded-2xl shadow-lg">
+                  <DropdownMenuItem onClick={handleShare} className="rounded-xl">
+                    <Share2 className="w-4 h-4 mr-2 text-blue-500" />
+                    공유하기
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(link.url, '_blank'); }} className="rounded-xl">
+                    <ExternalLink className="w-4 h-4 mr-2 text-green-500" />
+                    새 탭에서 열기
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </CardHeader>
         
@@ -123,15 +130,7 @@ export function LinkCard({ link }: LinkCardProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleViewContent}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 rounded-full hover:bg-purple-50"
-                >
-                  <Eye className="w-4 h-4 text-purple-500" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleShare}
+                  onClick={(e) => { e.stopPropagation(); handleShare(e); }}
                   className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 rounded-full hover:bg-blue-50"
                 >
                   <Share2 className="w-4 h-4 text-blue-500" />
