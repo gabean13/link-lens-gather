@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Users, TrendingUp, Star, Collection, Heart, Share2, Sparkles, BookOpen, Clock, Tag } from 'lucide-react';
+import { Users, TrendingUp, Star, Folder, Heart, Share2, Sparkles, BookOpen, Clock, Tag } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -37,7 +37,7 @@ const menuItems = [
   { 
     id: 'collections', 
     title: '👥 컬렉션 & 소셜', 
-    icon: Collection, 
+    icon: Folder, 
     description: '공유 컬렉션 둘러보기'
   },
   { 
