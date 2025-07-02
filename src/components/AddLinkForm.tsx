@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +8,11 @@ import { toast } from 'sonner';
 
 interface AddLinkFormProps {
   onSubmit: (link: any) => void;
+  initialUrl?: string;
 }
 
-export function AddLinkForm({ onSubmit }: AddLinkFormProps) {
-  const [url, setUrl] = useState('');
+export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
+  const [url, setUrl] = useState(initialUrl);
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
