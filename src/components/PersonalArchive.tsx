@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { AddLinkForm } from './AddLinkForm';
 import { LinkCard } from './LinkCard';
 import { SmartRecommendations } from './SmartRecommendations';
@@ -132,14 +133,6 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
       setLinkPreview(null);
       toast.success('링크가 즉시 저장되었어요! ⚡️');
     }
-  };
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
   };
 
   const unreadCount = smartCategories.unread.length;
@@ -313,41 +306,40 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
         </Button>
       </div>
 
-      {/* 태그 필터 */}
+      {/* 태그 필터 - 토글 그룹으로 변경 */}
       {allTags.length > 0 && (
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
             <Tag className="w-4 h-4 text-pink-500" />
             태그로 필터링
           </h3>
-          <div className="flex flex-wrap gap-2">
+          <ToggleGroup 
+            type="multiple" 
+            value={selectedTags} 
+            onValueChange={setSelectedTags}
+            className="justify-start flex-wrap gap-2"
+          >
             {allTags.map(tag => (
-              <Button
+              <ToggleGroupItem
                 key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleTag(tag)}
-                className={`rounded-full transition-all ${
-                  selectedTags.includes(tag) 
-                    ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-md" 
-                    : "border-gray-300 hover:bg-pink-50"
-                }`}
+                value={tag}
+                className="rounded-full border-gray-300 data-[state=on]:bg-gradient-to-r data-[state=on]:from-pink-400 data-[state=on]:to-purple-500 data-[state=on]:text-white data-[state=on]:shadow-md hover:bg-pink-50 transition-all"
               >
                 <Tag className="w-3 h-3 mr-1" />
                 {tag} ({smartCategories.byTag[tag]?.length || 0})
-              </Button>
+              </ToggleGroupItem>
             ))}
-            {selectedTags.length > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setSelectedTags([])}
-                className="rounded-full text-pink-600 hover:bg-pink-50"
-              >
-                전체 해제
-              </Button>
-            )}
-          </div>
+          </ToggleGroup>
+          {selectedTags.length > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setSelectedTags([])}
+              className="mt-2 rounded-full text-pink-600 hover:bg-pink-50"
+            >
+              전체 해제
+            </Button>
+          )}
         </div>
       )}
 

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Users, TrendingUp, Star, Folder, Heart, Share2, Sparkles, BookOpen, Clock, Tag } from 'lucide-react';
+import { Users, Folder, Heart, Share2, Sparkles, Tag, Plus, ChevronRight, ChevronDown } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface AppSidebarProps {
   onMenuClick: (menu: string) => void;
@@ -22,12 +23,6 @@ interface AppSidebarProps {
 }
 
 const menuItems = [
-  { 
-    id: 'popular', 
-    title: '🔥 인기 링크', 
-    icon: TrendingUp, 
-    description: '지금 핫한 링크들'
-  },
   { 
     id: 'friends', 
     title: '👫 친구들의 링크', 
@@ -40,37 +35,16 @@ const menuItems = [
     icon: Folder, 
     description: '공유 컬렉션 둘러보기'
   },
-  { 
-    id: 'weekly', 
-    title: '📊 주간 인기', 
-    icon: Star, 
-    description: '이번 주 TOP 링크'
-  },
-];
-
-const smartFeatures = [
-  { 
-    id: 'ai-recommend', 
-    title: 'AI 추천', 
-    icon: Sparkles, 
-    description: '맞춤 링크 추천'
-  },
-  { 
-    id: 'similar-links', 
-    title: '비슷한 링크', 
-    icon: BookOpen, 
-    description: '연관 링크 찾기'
-  },
-  { 
-    id: 'reading-time', 
-    title: '읽기 시간', 
-    icon: Clock, 
-    description: '예상 읽기 시간'
-  },
 ];
 
 export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
   const { open } = useSidebar();
+  const [showTags, setShowTags] = useState(true);
+  const [showFolders, setShowFolders] = useState(true);
+
+  // Mock data - 실제로는 props나 상태관리에서 가져올 것
+  const userTags = ['React', 'JavaScript', 'Design', 'Tutorial', 'News'];
+  const userFolders = ['프로젝트', '공부', '영감', '나중에 읽기'];
 
   return (
     <Sidebar className="bg-gradient-to-b from-pink-50 to-purple-50 border-r-2 border-pink-200">
@@ -119,34 +93,102 @@ export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* 태그 섹션 */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-purple-600 font-semibold">
-            ⚡ 스마트 기능
+          <SidebarGroupLabel className="text-blue-600 font-semibold flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              태그
+            </span>
+            {open && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTags(!showTags)}
+                className="h-6 w-6 p-0 hover:bg-blue-50"
+              >
+                {showTags ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </Button>
+            )}
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {smartFeatures.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    onClick={() => onMenuClick(item.id)}
-                    className={`rounded-xl transition-all ${
-                      currentMenu === item.id 
-                        ? 'bg-purple-100 text-purple-700 font-medium' 
-                        : 'hover:bg-purple-50'
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {open && (
-                      <div className="flex-1">
-                        <span>{item.title}</span>
-                        <p className="text-xs text-gray-500">{item.description}</p>
-                      </div>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          {showTags && (
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {userTags.map((tag) => (
+                  <SidebarMenuItem key={tag}>
+                    <SidebarMenuButton
+                      onClick={() => onMenuClick(`tag:${tag}`)}
+                      className={`rounded-xl transition-all ${
+                        currentMenu === `tag:${tag}` 
+                          ? 'bg-blue-100 text-blue-700 font-medium' 
+                          : 'hover:bg-blue-50'
+                      }`}
+                    >
+                      <Tag className="w-3 h-3" />
+                      {open && <span>#{tag}</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                {open && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton className="rounded-xl hover:bg-blue-50 text-blue-600">
+                      <Plus className="w-3 h-3" />
+                      <span>새 태그</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          )}
+        </SidebarGroup>
+
+        {/* 폴더 섹션 */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-purple-600 font-semibold flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Folder className="w-4 h-4" />
+              폴더
+            </span>
+            {open && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFolders(!showFolders)}
+                className="h-6 w-6 p-0 hover:bg-purple-50"
+              >
+                {showFolders ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </Button>
+            )}
+          </SidebarGroupLabel>
+          {showFolders && (
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {userFolders.map((folder) => (
+                  <SidebarMenuItem key={folder}>
+                    <SidebarMenuButton
+                      onClick={() => onMenuClick(`folder:${folder}`)}
+                      className={`rounded-xl transition-all ${
+                        currentMenu === `folder:${folder}` 
+                          ? 'bg-purple-100 text-purple-700 font-medium' 
+                          : 'hover:bg-purple-50'
+                      }`}
+                    >
+                      <Folder className="w-3 h-3" />
+                      {open && <span>{folder}</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                {open && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton className="rounded-xl hover:bg-purple-50 text-purple-600">
+                      <Plus className="w-3 h-3" />
+                      <span>새 폴더</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          )}
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
