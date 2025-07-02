@@ -22,7 +22,7 @@ interface AppSidebarProps {
   currentMenu: string;
 }
 
-const menuItems = [
+const socialMenuItems = [
   { 
     id: 'friends', 
     title: '👫 친구들의 링크', 
@@ -56,43 +56,13 @@ export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
           {open && (
             <div>
               <h2 className="font-bold text-gray-800">링크포켓</h2>
-              <p className="text-xs text-gray-500">소셜 & 발견</p>
+              <p className="text-xs text-gray-500">개인 아카이브</p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-pink-600 font-semibold">
-            🌟 소셜 기능
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    onClick={() => onMenuClick(item.id)}
-                    className={`rounded-xl transition-all ${
-                      currentMenu === item.id 
-                        ? 'bg-pink-100 text-pink-700 font-medium' 
-                        : 'hover:bg-pink-50'
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {open && (
-                      <div className="flex-1">
-                        <span>{item.title}</span>
-                        <p className="text-xs text-gray-500">{item.description}</p>
-                      </div>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         {/* 태그 섹션 */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-blue-600 font-semibold flex items-center justify-between">
@@ -189,6 +159,37 @@ export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
               </SidebarMenu>
             </SidebarGroupContent>
           )}
+        </SidebarGroup>
+
+        {/* 소셜 기능 섹션 */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-pink-600 font-semibold">
+            🌟 소셜 기능
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {socialMenuItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    onClick={() => onMenuClick(item.id)}
+                    className={`rounded-xl transition-all ${
+                      currentMenu === item.id 
+                        ? 'bg-pink-100 text-pink-700 font-medium' 
+                        : 'hover:bg-pink-50'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {open && (
+                      <div className="flex-1">
+                        <span>{item.title}</span>
+                        <p className="text-xs text-gray-500">{item.description}</p>
+                      </div>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

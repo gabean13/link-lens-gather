@@ -1,6 +1,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Plus, Tag, Calendar, Eye, BookOpen, Clock, Sparkles, Filter, User, TrendingUp, Heart, Zap } from 'lucide-react';
+import { Search, Plus, Tag, Calendar, Eye, BookOpen, Clock, Sparkles, Filter, User, TrendingUp, Heart, Zap, Star, Coffee, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,10 +19,9 @@ interface PersonalArchiveProps {
 
 export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showFAB, setShowFAB] = useState(true);
-  const [archiveView, setArchiveView] = useState<'all' | 'unread' | 'recent' | 'categories'>('all');
+  const [archiveView, setArchiveView] = useState<'all' | 'unread' | 'recent' | 'frequent' | 'today-pick'>('all');
   const [linkPreview, setLinkPreview] = useState<any>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
 
@@ -48,16 +47,12 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
         return linkDate > threeDaysAgo;
       }),
       unread: links.filter(link => !link.isRead),
-      byTag: {} as Record<string, any[]>
+      frequent: links.filter(link => link.readCount && link.readCount > 2), // 2번 이상 읽은 링크
+      todayPick: links.slice().sort(() => Math.random() - 0.5).slice(0, 6), // 랜덤 추천
     };
 
-    // 태그별 자동 분류
-    allTags.forEach(tag => {
-      categories.byTag[tag] = links.filter(link => link.tags.includes(tag));
-    });
-
     return categories;
-  }, [links, allTags]);
+  }, [links]);
 
   // URL 미리보기 자동 생성
   const handleUrlInput = async (url: string) => {
@@ -88,6 +83,12 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
       case 'recent':
         filtered = smartCategories.recent;
         break;
+      case 'frequent':
+        filtered = smartCategories.frequent;
+        break;
+      case 'today-pick':
+        filtered = smartCategories.todayPick;
+        break;
       default:
         filtered = links;
     }
@@ -96,12 +97,6 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
       filtered = filtered.filter(link => 
         link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         link.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(link => 
-        selectedTags.some(tag => link.tags.includes(tag))
       );
     }
     
@@ -137,6 +132,7 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
 
   const unreadCount = smartCategories.unread.length;
   const recentCount = smartCategories.recent.length;
+  const frequentCount = smartCategories.frequent.length;
 
   // AI 추천 링크 (사용자의 태그 기반)
   const aiRecommendedLinks = links.filter(link => 
@@ -278,7 +274,7 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
         </section>
       )}
 
-      {/* 스마트 분류 탭 */}
+      {/* 잡지 스타일 분류 탭 */}
       <div className="flex gap-2 flex-wrap">
         <Button
           variant={archiveView === 'all' ? "default" : "outline"}
@@ -304,44 +300,23 @@ export function PersonalArchive({ links, onAddLink }: PersonalArchiveProps) {
         >
           ⏰ 최근 ({recentCount})
         </Button>
+        <Button
+          variant={archiveView === 'frequent' ? "default" : "outline"}
+          size="sm"
+          onClick={() => setArchiveView('frequent')}
+          className={`rounded-full ${archiveView === 'frequent' ? "bg-purple-500 text-white" : "border-purple-300 hover:bg-purple-50"}`}
+        >
+          ⭐ 자주 읽음 ({frequentCount})
+        </Button>
+        <Button
+          variant={archiveView === 'today-pick' ? "default" : "outline"}
+          size="sm"
+          onClick={() => setArchiveView('today-pick')}
+          className={`rounded-full ${archiveView === 'today-pick' ? "bg-green-500 text-white" : "border-green-300 hover:bg-green-50"}`}
+        >
+          ☕ 오늘은 이 포스트 어때요? (6)
+        </Button>
       </div>
-
-      {/* 태그 필터 - 토글 그룹으로 변경 */}
-      {allTags.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-            <Tag className="w-4 h-4 text-pink-500" />
-            태그로 필터링
-          </h3>
-          <ToggleGroup 
-            type="multiple" 
-            value={selectedTags} 
-            onValueChange={setSelectedTags}
-            className="justify-start flex-wrap gap-2"
-          >
-            {allTags.map(tag => (
-              <ToggleGroupItem
-                key={tag}
-                value={tag}
-                className="rounded-full border-gray-300 data-[state=on]:bg-gradient-to-r data-[state=on]:from-pink-400 data-[state=on]:to-purple-500 data-[state=on]:text-white data-[state=on]:shadow-md hover:bg-pink-50 transition-all"
-              >
-                <Tag className="w-3 h-3 mr-1" />
-                {tag} ({smartCategories.byTag[tag]?.length || 0})
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-          {selectedTags.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setSelectedTags([])}
-              className="mt-2 rounded-full text-pink-600 hover:bg-pink-50"
-            >
-              전체 해제
-            </Button>
-          )}
-        </div>
-      )}
 
       {/* 링크 리스트 */}
       {filteredLinks.length > 0 ? (
