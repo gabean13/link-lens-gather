@@ -9,7 +9,7 @@ import { mockLinks } from '@/data/mockData';
 const Index = () => {
   const [links, setLinks] = useState(mockLinks.map(link => ({
     ...link,
-    folder: link.folder || '기타' // 기본 폴더 설정
+    folder: (link as any).folder || '기타' // 기본 폴더 설정, 타입 안전성을 위해 타입 단언 사용
   })));
   const [currentMenu, setCurrentMenu] = useState('home');
   const [userFolders, setUserFolders] = useState([
