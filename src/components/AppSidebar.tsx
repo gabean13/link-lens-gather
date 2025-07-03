@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
-import { Users, Folder, Heart, Share2, Sparkles, Tag, Plus, ChevronRight, ChevronDown } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Folder, Tag, Plus, ChevronRight, ChevronDown, FolderPlus, Home } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -14,55 +13,155 @@ import {
   SidebarHeader,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface AppSidebarProps {
   onMenuClick: (menu: string) => void;
   currentMenu: string;
+  userFolders: string[];
+  onCreateFolder: (folderName: string) => void;
 }
 
-const socialMenuItems = [
-  { 
-    id: 'friends', 
-    title: '👫 친구들의 링크', 
-    icon: Users, 
-    description: '친구들이 공유한 링크'
-  },
-  { 
-    id: 'collections', 
-    title: '👥 컬렉션 & 소셜', 
-    icon: Folder, 
-    description: '공유 컬렉션 둘러보기'
-  },
-];
-
-export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
+export function AppSidebar({ onMenuClick, currentMenu, userFolders, onCreateFolder }: AppSidebarProps) {
   const { open } = useSidebar();
   const [showTags, setShowTags] = useState(true);
   const [showFolders, setShowFolders] = useState(true);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // Mock data - 실제로는 props나 상태관리에서 가져올 것
-  const userTags = ['React', 'JavaScript', 'Design', 'Tutorial', 'News'];
-  const userFolders = ['프로젝트', '공부', '영감', '나중에 읽기'];
+  const userTags = ['React', 'JavaScript', 'Design', 'Tutorial', 'News', 'AI', 'Development'];
+
+  const handleCreateFolder = () => {
+    if (newFolderName.trim()) {
+      onCreateFolder(newFolderName.trim());
+      setNewFolderName('');
+      setShowCreateDialog(false);
+      toast.success(`"${newFolderName}" 폴더가 생성되었습니다! 📁`);
+    }
+  };
 
   return (
-    <Sidebar className="bg-gradient-to-b from-pink-50 to-purple-50 border-r-2 border-pink-200">
+    <Sidebar className="bg-gradient-to-b from-slate-50 to-slate-100 border-r-2 border-slate-200">
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <Folder className="w-6 h-6 text-white" />
           </div>
           {open && (
             <div>
-              <h2 className="font-bold text-gray-800">링크포켓</h2>
-              <p className="text-xs text-gray-500">개인 아카이브</p>
+              <Button
+                variant="ghost"
+                onClick={() => onMenuClick('home')}
+                className="p-0 h-auto font-bold text-slate-800 hover:text-blue-600 transition-colors"
+              >
+                링크포켓
+              </Button>
+              <p className="text-xs text-slate-500">스마트 링크 관리</p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent>
+        {/* 홈 버튼 */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onMenuClick('home')}
+                  className={`rounded-xl transition-all ${
+                    currentMenu === 'home' 
+                      ? 'bg-blue-100 text-blue-700 font-medium shadow-sm' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
+                  {open && <span>홈</span>}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 폴더 섹션 */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-purple-600 font-semibold flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Folder className="w-4 h-4" />
+              폴더
+            </span>
+            {open && (
+              <div className="flex gap-1">
+                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-purple-100 text-purple-600"
+                    >
+                      <FolderPlus className="w-3 h-3" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>새 폴더 만들기</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="폴더 이름을 입력하세요"
+                        value={newFolderName}
+                        onChange={(e) => setNewFolderName(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                          취소
+                        </Button>
+                        <Button onClick={handleCreateFolder} disabled={!newFolderName.trim()}>
+                          생성
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowFolders(!showFolders)}
+                  className="h-6 w-6 p-0 hover:bg-purple-100"
+                >
+                  {showFolders ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                </Button>
+              </div>
+            )}
+          </SidebarGroupLabel>
+          {showFolders && (
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {userFolders.map((folder) => (
+                  <SidebarMenuItem key={folder}>
+                    <SidebarMenuButton
+                      onClick={() => onMenuClick(`folder:${folder}`)}
+                      className={`rounded-xl transition-all ${
+                        currentMenu === `folder:${folder}` 
+                          ? 'bg-purple-100 text-purple-700 font-medium shadow-sm' 
+                          : 'hover:bg-purple-50'
+                      }`}
+                    >
+                      <Folder className="w-3 h-3" />
+                      {open && <span>{folder}</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          )}
+        </SidebarGroup>
+
         {/* 태그 섹션 */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-blue-600 font-semibold flex items-center justify-between">
@@ -75,7 +174,7 @@ export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowTags(!showTags)}
-                className="h-6 w-6 p-0 hover:bg-blue-50"
+                className="h-6 w-6 p-0 hover:bg-blue-100"
               >
                 {showTags ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
               </Button>
@@ -90,7 +189,7 @@ export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
                       onClick={() => onMenuClick(`tag:${tag}`)}
                       className={`rounded-xl transition-all ${
                         currentMenu === `tag:${tag}` 
-                          ? 'bg-blue-100 text-blue-700 font-medium' 
+                          ? 'bg-blue-100 text-blue-700 font-medium shadow-sm' 
                           : 'hover:bg-blue-50'
                       }`}
                     >
@@ -99,97 +198,9 @@ export function AppSidebar({ onMenuClick, currentMenu }: AppSidebarProps) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-                {open && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton className="rounded-xl hover:bg-blue-50 text-blue-600">
-                      <Plus className="w-3 h-3" />
-                      <span>새 태그</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
               </SidebarMenu>
             </SidebarGroupContent>
           )}
-        </SidebarGroup>
-
-        {/* 폴더 섹션 */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-purple-600 font-semibold flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Folder className="w-4 h-4" />
-              폴더
-            </span>
-            {open && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFolders(!showFolders)}
-                className="h-6 w-6 p-0 hover:bg-purple-50"
-              >
-                {showFolders ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-              </Button>
-            )}
-          </SidebarGroupLabel>
-          {showFolders && (
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {userFolders.map((folder) => (
-                  <SidebarMenuItem key={folder}>
-                    <SidebarMenuButton
-                      onClick={() => onMenuClick(`folder:${folder}`)}
-                      className={`rounded-xl transition-all ${
-                        currentMenu === `folder:${folder}` 
-                          ? 'bg-purple-100 text-purple-700 font-medium' 
-                          : 'hover:bg-purple-50'
-                      }`}
-                    >
-                      <Folder className="w-3 h-3" />
-                      {open && <span>{folder}</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-                {open && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton className="rounded-xl hover:bg-purple-50 text-purple-600">
-                      <Plus className="w-3 h-3" />
-                      <span>새 폴더</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          )}
-        </SidebarGroup>
-
-        {/* 소셜 기능 섹션 */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-pink-600 font-semibold">
-            🌟 소셜 기능
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {socialMenuItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    onClick={() => onMenuClick(item.id)}
-                    className={`rounded-xl transition-all ${
-                      currentMenu === item.id 
-                        ? 'bg-pink-100 text-pink-700 font-medium' 
-                        : 'hover:bg-pink-50'
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {open && (
-                      <div className="flex-1">
-                        <span>{item.title}</span>
-                        <p className="text-xs text-gray-500">{item.description}</p>
-                      </div>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

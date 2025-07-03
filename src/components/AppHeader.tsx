@@ -1,49 +1,35 @@
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Sparkles, Users, Heart } from 'lucide-react';
+import { Sparkles, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
-interface AppHeaderProps {
-  onSocialClick?: (type: 'friends' | 'collections') => void;
-}
-
-export function AppHeader({ onSocialClick }: AppHeaderProps) {
+export function AppHeader() {
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-pink-200 shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
-          <SidebarTrigger className="rounded-xl hover:bg-pink-50" />
+          <SidebarTrigger className="rounded-xl hover:bg-slate-100 transition-colors" />
           
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg transform rotate-12">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-800">링크포켓</h1>
-              <p className="text-xs text-gray-500">나만의 링크 보관함 💝</p>
+              <h1 className="text-xl font-bold text-slate-800">링크포켓</h1>
+              <p className="text-xs text-slate-500">스마트 링크 관리 시스템</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onSocialClick?.('friends')}
-            className="rounded-full hover:bg-pink-50"
-          >
-            <Users className="w-4 h-4 mr-2 text-pink-500" />
-            친구들
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onSocialClick?.('collections')}
-            className="rounded-full hover:bg-purple-50"
-          >
-            <Heart className="w-4 h-4 mr-2 text-purple-500" />
-            컬렉션
-          </Button>
+        <div className="flex items-center gap-4">
+          <div className="relative hidden md:block">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Input
+              placeholder="링크 검색..."
+              className="pl-10 w-64 bg-slate-50 border-slate-200 focus:border-blue-400 rounded-xl"
+            />
+          </div>
         </div>
       </div>
     </header>
