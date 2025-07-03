@@ -14,17 +14,26 @@ const Index = () => {
     setLinks(prev => [{ ...newLink, id: Date.now().toString() }, ...prev]);
   };
 
+  const handleDeleteLink = (linkId: string) => {
+    setLinks(prev => prev.filter(link => link.id !== linkId));
+  };
+
+  const handleSocialClick = (type: 'friends' | 'collections') => {
+    setCurrentMenu(type);
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
         <AppSidebar onMenuClick={setCurrentMenu} currentMenu={currentMenu} />
         
         <main className="flex-1">
-          <AppHeader />
+          <AppHeader onSocialClick={handleSocialClick} />
           <MainContent 
             currentMenu={currentMenu}
             links={links}
             onAddLink={handleAddLink}
+            onDeleteLink={handleDeleteLink}
             setCurrentMenu={setCurrentMenu}
           />
         </main>

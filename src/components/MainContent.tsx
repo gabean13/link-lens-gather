@@ -9,10 +9,11 @@ interface MainContentProps {
   currentMenu: string;
   links: any[];
   onAddLink: (newLink: any) => void;
+  onDeleteLink?: (linkId: string) => void;
   setCurrentMenu: (menu: string) => void;
 }
 
-export function MainContent({ currentMenu, links, onAddLink, setCurrentMenu }: MainContentProps) {
+export function MainContent({ currentMenu, links, onAddLink, onDeleteLink, setCurrentMenu }: MainContentProps) {
   const renderContent = () => {
     switch (currentMenu) {
       case 'friends':
@@ -40,7 +41,7 @@ export function MainContent({ currentMenu, links, onAddLink, setCurrentMenu }: M
           </div>
         );
       default:
-        return <PersonalArchive links={links} onAddLink={onAddLink} currentMenu={currentMenu} />;
+        return <PersonalArchive links={links} onAddLink={onAddLink} onDeleteLink={onDeleteLink} currentMenu={currentMenu} />;
     }
   };
 

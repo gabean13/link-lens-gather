@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { Search, Plus, Tag, Calendar, Eye, BookOpen, Clock, Sparkles, Filter, User, TrendingUp, Heart, Zap, Star, Coffee, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -15,10 +14,11 @@ import { toast } from 'sonner';
 interface PersonalArchiveProps {
   links: any[];
   onAddLink: (link: any) => void;
+  onDeleteLink?: (linkId: string) => void;
   currentMenu?: string;
 }
 
-export function PersonalArchive({ links, onAddLink, currentMenu = 'home' }: PersonalArchiveProps) {
+export function PersonalArchive({ links, onAddLink, onDeleteLink, currentMenu = 'home' }: PersonalArchiveProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showFAB, setShowFAB] = useState(true);
@@ -243,46 +243,17 @@ export function PersonalArchive({ links, onAddLink, currentMenu = 'home' }: Pers
 
   return (
     <div className="space-y-8 relative">
-      {/* 개인화된 환영 메시지 */}
+      {/* 간단한 환영 메시지 */}
       <div className="text-center py-6">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-            <User className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">{userName}님, 안녕하세요! 👋</h1>
-            <p className="text-gray-600">오늘도 새로운 영감을 발견해 보세요!</p>
-          </div>
-        </div>
-
-        {/* 개인화 대시보드 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-700">{thisWeekLinks}개</div>
-              <div className="text-sm text-blue-600">이번 주 저장한 링크</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-700">#{mostUsedTag}</div>
-              <div className="text-sm text-green-600">가장 많이 사용하는 태그</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-700">{filteredLinks.length}개</div>
-              <div className="text-sm text-purple-600">{getCurrentMenuTitle()}</div>
-            </CardContent>
-          </Card>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">링크 아카이브 📚</h1>
+        <p className="text-gray-600">소중한 링크들을 체계적으로 관리해보세요</p>
       </div>
 
       {/* 강화된 링크 추가 영역 */}
       <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-8 rounded-3xl border-2 border-pink-200 shadow-lg">
         <div className="text-center mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
-            <Sparkles className="w-6 h-6 text-pink-500" />
+            <Sparkles className="w-6 h-6 text-pink-400" />
             새로운 링크를 저장해보세요!
           </h2>
           <p className="text-gray-600">URL을 붙여넣으면 자동으로 미리보기가 생성됩니다 ✨</p>
@@ -359,7 +330,7 @@ export function PersonalArchive({ links, onAddLink, currentMenu = 'home' }: Pers
         </form>
       </div>
 
-      {/* AI 추천 섹션을 메인으로 이동 */}
+      {/* AI 추천 섹션 */}
       {aiRecommendedLinks.length > 0 && currentMenu === 'home' && (
         <section>
           <div className="flex items-center gap-3 mb-6">
@@ -367,8 +338,8 @@ export function PersonalArchive({ links, onAddLink, currentMenu = 'home' }: Pers
               <Heart className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">{userName}님을 위한 맞춤 링크 💝</h2>
-              <p className="text-sm text-gray-600">AI가 선별한 당신만의 특별한 콘텐츠</p>
+              <h2 className="text-xl font-bold text-gray-800">맞춤 추천 링크 💝</h2>
+              <p className="text-sm text-gray-600">AI가 선별한 특별한 콘텐츠</p>
             </div>
             <Badge className="bg-green-100 text-green-700 rounded-full font-bold">
               AI 추천
@@ -376,7 +347,7 @@ export function PersonalArchive({ links, onAddLink, currentMenu = 'home' }: Pers
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {aiRecommendedLinks.map(link => (
-              <LinkCard key={link.id} link={link} />
+              <LinkCard key={link.id} link={link} onDelete={onDeleteLink} />
             ))}
           </div>
         </section>
@@ -434,7 +405,7 @@ export function PersonalArchive({ links, onAddLink, currentMenu = 'home' }: Pers
       {filteredLinks.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredLinks.map(link => (
-            <LinkCard key={link.id} link={link} />
+            <LinkCard key={link.id} link={link} onDelete={onDeleteLink} />
           ))}
         </div>
       ) : (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Clock, Share2, Eye, MoreVertical, Heart, Bookmark } from 'lucide-react';
+import { ExternalLink, Clock, Share2, Eye, MoreVertical, Heart, Bookmark, Trash } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,9 +19,10 @@ interface LinkCardProps {
     addedAt: string;
     isRead: boolean;
   };
+  onDelete?: (linkId: string) => void;
 }
 
-export function LinkCard({ link }: LinkCardProps) {
+export function LinkCard({ link, onDelete }: LinkCardProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -64,6 +65,14 @@ export function LinkCard({ link }: LinkCardProps) {
     e.stopPropagation();
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(link.id);
+      toast.success('링크가 삭제되었어요! 🗑️');
+    }
+  };
+
   return (
     <>
       <Card 
@@ -95,7 +104,11 @@ export function LinkCard({ link }: LinkCardProps) {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(link.url, '_blank'); }} className="rounded-xl">
                     <ExternalLink className="w-4 h-4 mr-2 text-green-500" />
-                    새 탭에서 열기
+                    바로가기
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDelete} className="rounded-xl text-red-600">
+                    <Trash className="w-4 h-4 mr-2" />
+                    삭제하기
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -149,10 +162,11 @@ export function LinkCard({ link }: LinkCardProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => { e.stopPropagation(); handleShare(e); }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 rounded-full hover:bg-blue-50"
+                  onClick={(e) => { e.stopPropagation(); window.open(link.url, '_blank'); }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 rounded-full hover:bg-green-50"
+                  title="바로가기"
                 >
-                  <Share2 className="w-4 h-4 text-blue-500" />
+                  <ExternalLink className="w-4 h-4 text-green-500" />
                 </Button>
               </div>
             </div>
@@ -172,8 +186,9 @@ export function LinkCard({ link }: LinkCardProps) {
                 size="sm"
                 onClick={() => window.open(link.url, '_blank')}
                 className="ml-auto rounded-full hover:bg-pink-50"
+                title="바로가기"
               >
-                <ExternalLink className="w-4 h-4 text-pink-500" />
+                바로가기
               </Button>
             </DialogTitle>
           </DialogHeader>
