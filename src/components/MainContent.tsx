@@ -15,32 +15,32 @@ interface MainContentProps {
 export function MainContent({ currentMenu, links, onAddLink, setCurrentMenu }: MainContentProps) {
   const renderContent = () => {
     switch (currentMenu) {
-      case 'popular':
+      case 'friends':
         return (
           <div className="space-y-6">
             <div className="text-center py-8">
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">🔥 인기 링크</h1>
-              <p className="text-gray-600">지금 가장 인기있는 링크들을 확인해보세요</p>
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">👫 친구들의 링크</h1>
+              <p className="text-gray-600">친구들이 공유한 링크를 확인하고 소통해보세요</p>
             </div>
-            <SmartRecommendations links={links.slice().sort(() => Math.random() - 0.5).slice(0, 12)} />
+            <div className="max-w-4xl mx-auto">
+              <FriendsPanel onClose={() => setCurrentMenu('home')} />
+            </div>
           </div>
         );
-      case 'friends':
-        return <FriendsPanel onClose={() => setCurrentMenu('home')} />;
       case 'collections':
-        return <CollectionsPanel onClose={() => setCurrentMenu('home')} />;
-      case 'weekly':
         return (
           <div className="space-y-6">
             <div className="text-center py-8">
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">📊 주간 인기 링크</h1>
-              <p className="text-gray-600">이번 주 가장 많이 저장된 링크들</p>
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">👥 컬렉션 & 소셜</h1>
+              <p className="text-gray-600">공유 컬렉션을 둘러보고 다른 사용자들과 연결하세요</p>
             </div>
-            <WeeklyTopLinks />
+            <div className="max-w-4xl mx-auto">
+              <CollectionsPanel onClose={() => setCurrentMenu('home')} />
+            </div>
           </div>
         );
       default:
-        return <PersonalArchive links={links} onAddLink={onAddLink} />;
+        return <PersonalArchive links={links} onAddLink={onAddLink} currentMenu={currentMenu} />;
     }
   };
 
