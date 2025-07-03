@@ -1,9 +1,8 @@
 
 import { useState, useMemo } from 'react';
-import { Search, Plus, Calendar, BookOpen, Clock, Sparkles, Filter, TrendingUp, Heart, Zap, Star, Coffee, Folder, FolderOpen, Loader2 } from 'lucide-react';
+import { Search, Plus, BookOpen, Sparkles, Loader2, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AddLinkForm } from './AddLinkForm';
@@ -50,8 +49,7 @@ export function PersonalArchive({ links, onAddLink, onDeleteLink, currentMenu }:
 
     const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
-      toast.error('Gemini API 키를 먼저 설정해주세요');
-      setShowAddDialog(true);
+      toast.error('상단바에서 Gemini API 키를 먼저 설정해주세요');
       return;
     }
 
@@ -154,7 +152,7 @@ export function PersonalArchive({ links, onAddLink, onDeleteLink, currentMenu }:
       <div className="text-center py-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl border-2 border-blue-100">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-slate-800 mb-3 flex items-center justify-center gap-3">
-            {currentMenu.startsWith('folder:') ? <FolderOpen className="w-8 h-8 text-blue-500" /> : <BookOpen className="w-8 h-8 text-blue-500" />}
+            <BookOpen className="w-8 h-8 text-blue-500" />
             {getCurrentMenuTitle()}
           </h1>
           <p className="text-slate-600 text-lg">Gemini AI가 실시간으로 분석하는 스마트 링크 관리 서비스</p>
@@ -175,7 +173,7 @@ export function PersonalArchive({ links, onAddLink, onDeleteLink, currentMenu }:
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-500 w-6 h-6" />
                 <Input
-                  placeholder="https://example.com - Gemini AI가 실시간으로 분석합니다"
+                  placeholder="https://example.com - 입력하면 자동으로 분석됩니다"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-14 pr-4 py-4 bg-white/90 border-2 border-blue-300 focus:border-blue-500 rounded-2xl text-lg shadow-sm"
@@ -193,7 +191,7 @@ export function PersonalArchive({ links, onAddLink, onDeleteLink, currentMenu }:
                   ) : (
                     <Zap className="w-5 h-5 mr-2" />
                   )}
-                  {isQuickAnalyzing ? '분석중...' : '스마트 저장'}
+                  {isQuickAnalyzing ? '분석중...' : '빠른 저장'}
                 </Button>
               )}
             </div>

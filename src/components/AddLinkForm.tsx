@@ -1,18 +1,24 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus, Sparkles, Heart, Zap, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { X, Plus, Sparkles, Heart, Zap, Loader2, Check, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LinkAnalyzer } from '@/services/linkAnalyzer';
-import { ApiKeyInput } from './ApiKeyInput';
 
 interface AddLinkFormProps {
   onSubmit: (link: any) => void;
   initialUrl?: string;
 }
+
+const FOLDER_OPTIONS = [
+  '개발/코딩', '디자인/UI-UX', '뉴스/트렌드', '학습/교육', 
+  '블로그/아티클', '도구/서비스', '비즈니스/마케팅', '라이프스타일', '기타'
+];
 
 export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
   const [url, setUrl] = useState(initialUrl);
@@ -20,16 +26,25 @@ export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
   const [newTag, setNewTag] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
+  const [editableResult, setEditableResult] = useState<any>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingSummary, setIsEditingSummary] = useState(false);
 
-  const handleApiKeySet = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('gemini_api_key', key);
-  };
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (url && url.startsWith('http') && !isAnalyzing && !analysisResult) {
+        handleAutoAnalysis();
+      }
+    }, 1000);
 
-  const analyzeUrl = async (inputUrl: string) => {
+    return () => clearTimeout(timeoutId);
+  }, [url]);
+
+  const handleAutoAnalysis = async () => {
+    const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
-      toast.error('먼저 Gemini API 키를 설정해주세요');
+      toast.error('상단바에서 API 키를 먼저 설정해주세요');
       return;
     }
 
@@ -37,40 +52,24 @@ export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
     
     try {
       const analyzer = new LinkAnalyzer(apiKey);
-      const result = await analyzer.analyzeUrl(inputUrl);
+      const result = await analyzer.analyzeUrl(url);
       
       setAnalysisResult(result);
+      setEditableResult({ ...result });
       toast.success('🤖 AI 분석이 완료되었습니다!');
     } catch (error) {
       console.error('분석 오류:', error);
       toast.error(`분석 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
-      
-      // 실패 시 기본 분석 결과 제공
-      setAnalysisResult({
-        title: '링크 제목',
-        description: '링크 설명을 가져올 수 없습니다',
-        summary: 'AI 분석에 실패했습니다. 수동으로 정보를 입력해주세요.',
-        tags: ['일반'],
-        folder: '기타',
-        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=200&fit=crop'
-      });
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const handleUrlAnalysis = async () => {
-    if (!url.trim()) {
-      toast.error('URL을 입력해주세요');
-      return;
-    }
-    
-    if (!url.startsWith('http')) {
-      toast.error('올바른 URL을 입력해주세요 (http:// 또는 https://)');
-      return;
-    }
-    
-    await analyzeUrl(url);
+  const handleFieldEdit = (field: string, value: string) => {
+    setEditableResult(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const addCustomTag = () => {
@@ -84,10 +83,10 @@ export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
   const removeTag = (tag: string, isCustom: boolean) => {
     if (isCustom) {
       setCustomTags(customTags.filter(t => t !== tag));
-    } else if (analysisResult) {
-      setAnalysisResult({
-        ...analysisResult,
-        tags: analysisResult.tags.filter((t: string) => t !== tag)
+    } else if (editableResult) {
+      setEditableResult({
+        ...editableResult,
+        tags: editableResult.tags.filter((t: string) => t !== tag)
       });
     }
     toast.success(`"${tag}" 태그를 제거했습니다`);
@@ -101,12 +100,12 @@ export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
       return;
     }
 
-    let finalResult = analysisResult;
+    let finalResult = editableResult || analysisResult;
     
-    // 분석 결과가 없으면 분석 실행
-    if (!analysisResult) {
+    if (!finalResult) {
+      const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) {
-        toast.error('API 키를 설정하고 링크를 분석해주세요');
+        toast.error('상단바에서 API 키를 설정해주세요');
         return;
       }
       
@@ -138,42 +137,26 @@ export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
     setUrl('');
     setCustomTags([]);
     setAnalysisResult(null);
+    setEditableResult(null);
     setNewTag('');
   };
 
   return (
     <div className="space-y-6">
-      <ApiKeyInput onApiKeySet={handleApiKeySet} currentApiKey={apiKey} />
-      
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
           <Label htmlFor="url" className="text-base font-medium text-gray-700 flex items-center gap-2">
             <Zap className="w-4 h-4 text-pink-500" />
-            링크 주소
+            링크 주소 (자동 분석됩니다)
           </Label>
-          <div className="flex gap-2">
-            <Input
-              id="url"
-              type="url"
-              placeholder="https://example.com"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="flex-1 py-3 px-4 border-2 border-gray-200 focus:border-pink-300 rounded-2xl"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleUrlAnalysis}
-              disabled={!url.trim() || isAnalyzing || !apiKey}
-              className="rounded-2xl border-2 hover:bg-pink-50 hover:border-pink-300"
-            >
-              {isAnalyzing ? (
-                <Loader2 className="w-5 h-5 animate-spin text-pink-500" />
-              ) : (
-                <Sparkles className="w-5 h-5 text-pink-500" />
-              )}
-            </Button>
-          </div>
+          <Input
+            id="url"
+            type="url"
+            placeholder="https://example.com"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="py-3 px-4 border-2 border-gray-200 focus:border-pink-300 rounded-2xl"
+          />
         </div>
 
         {isAnalyzing && (
@@ -185,39 +168,124 @@ export function AddLinkForm({ onSubmit, initialUrl = '' }: AddLinkFormProps) {
           </div>
         )}
 
-        {analysisResult && (
+        {editableResult && (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-green-600" />
-                <span className="font-medium text-green-700">AI 분석 결과</span>
+                <span className="font-medium text-green-700">AI 분석 결과 (수정 가능)</span>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">제목</Label>
-                  <p className="text-gray-800 font-medium">{analysisResult.title}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-sm font-medium text-gray-600">제목</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingTitle(!isEditingTitle)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  {isEditingTitle ? (
+                    <Input
+                      value={editableResult.title}
+                      onChange={(e) => handleFieldEdit('title', e.target.value)}
+                      onBlur={() => setIsEditingTitle(false)}
+                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
+                      className="text-sm"
+                      autoFocus
+                    />
+                  ) : (
+                    <p className="text-gray-800 font-medium cursor-pointer hover:bg-gray-50 p-2 rounded" 
+                       onClick={() => setIsEditingTitle(true)}>
+                      {editableResult.title}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">설명</Label>
-                  <p className="text-gray-700 text-sm">{analysisResult.description}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-sm font-medium text-gray-600">설명</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingDescription(!isEditingDescription)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  {isEditingDescription ? (
+                    <Textarea
+                      value={editableResult.description}
+                      onChange={(e) => handleFieldEdit('description', e.target.value)}
+                      onBlur={() => setIsEditingDescription(false)}
+                      className="text-sm"
+                      autoFocus
+                    />
+                  ) : (
+                    <p className="text-gray-700 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded" 
+                       onClick={() => setIsEditingDescription(true)}>
+                      {editableResult.description}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">요약</Label>
-                  <p className="text-gray-700 text-sm">{analysisResult.summary}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-sm font-medium text-gray-600">요약</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingSummary(!isEditingSummary)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  {isEditingSummary ? (
+                    <Textarea
+                      value={editableResult.summary}
+                      onChange={(e) => handleFieldEdit('summary', e.target.value)}
+                      onBlur={() => setIsEditingSummary(false)}
+                      className="text-sm"
+                      autoFocus
+                    />
+                  ) : (
+                    <p className="text-gray-700 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded" 
+                       onClick={() => setIsEditingSummary(true)}>
+                      {editableResult.summary}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
                   <Label className="text-sm font-medium text-gray-600">폴더</Label>
-                  <Badge variant="outline" className="ml-2">📁 {analysisResult.folder}</Badge>
+                  <Select 
+                    value={editableResult.folder} 
+                    onValueChange={(value) => handleFieldEdit('folder', value)}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FOLDER_OPTIONS.map(folder => (
+                        <SelectItem key={folder} value={folder}>📁 {folder}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">태그</Label>
+                  <Label className="text-sm font-medium text-gray-600">AI 생성 태그</Label>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {analysisResult.tags.map((tag: string) => (
+                    {editableResult.tags.map((tag: string) => (
                       <Badge
                         key={tag}
                         variant="secondary"
